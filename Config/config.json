@@ -1,0 +1,7 @@
+{
+    "username":  "<username>",
+    "password":  "<password>",
+    "symmetrixId":  "000000000000",
+    "endpoint":  "<ipaddress>",
+    "port":  "8443"
+}
