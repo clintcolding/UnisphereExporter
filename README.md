@@ -32,7 +32,3 @@ Copy-Item -Path .\UnisphereExporter\StartListener.ps1 -Destination D:\Resources\
 4. Setup as a service by running `CreateService.ps1`
 
 5. Validate by locally browsing to [http://localhost:9183/metrics](http://localhost:9183/metrics)
-
-### Contributions
-
-[Clint Colding](https://gitlab.servevirtual.net/Colding) - Author
