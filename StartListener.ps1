@@ -36,7 +36,9 @@ New-PolarisGetRoute -Path "/metrics" -Force -Scriptblock {
             foreach ($i in $data) {
                 $metricdata += "$($i.name)" + "{" + "$($i.label)" + "}" + " " + "$($i.value)"
             }
-            $content = $metricdata | Out-String
+            $content = $metricdata -join "`n" | Out-String
+            #---- Replace carriage returns and line feeds with just line feeds (\n) ----#
+            $content = $content.Replace("`r`n","`n")
         }
         else {
             $content = "No metrics returned!"
@@ -47,7 +49,7 @@ New-PolarisGetRoute -Path "/metrics" -Force -Scriptblock {
     }
 
     #---- Serve metrics in plain text format ----#
-    $Response.SetContentType("text/plain")
+    $Response.SetContentType("text/plain; version=0.0.4; charset=utf-8")
     $Response.Send($content)
 }
 
