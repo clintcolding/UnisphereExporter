@@ -19,8 +19,8 @@ function Get-Metrics {
     }
 
     process {
+        $ids = $null
         $metrics = @()
-
         #---- Build basic auth request header ----#
         $credPair = "$($config.username):$($config.password)"
         $encodedCredentials = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($credPair))
@@ -31,7 +31,12 @@ function Get-Metrics {
 
         foreach ($resource in $resources) {
             #---- Gather required resource ID's ----#
-            $ids = Get-ResourceID -Resource $resource.resource
+            if ($resource.key) {
+                $ids = Get-ResourceID -Resource $resource.key
+            }
+            if (!$resource.key) {
+                $ids = Get-ResourceID -Resource $resource.resource
+            }
 
             #---- Build static request body ----#
             $data = @{}
@@ -48,7 +53,12 @@ function Get-Metrics {
             #---- If ID's were returned, gather metrics for each ID ----#
             if ($ids) {
                 foreach ($id in $ids) {
-                    $resourcename = $resource.resource.Replace(($resource.resource.substring(0,1)),(([string]$resource.resource[0]).ToLower()))
+                    if ($resource.key) {
+                        $resourceName = $resource.key
+                    }
+                    else {
+                        $resourcename = $resource.resource.Replace(($resource.resource.substring(0,1)),(([string]$resource.resource[0]).ToLower()))
+                    }
                     $data["$($resourcename)Id"] = $id
                     $body = ConvertTo-Json $data
                     try {
@@ -62,8 +72,8 @@ function Get-Metrics {
                     foreach ($metric in ($m.PSObject.Properties | Select -Expand Name | Where-Object {$_ -ne "timestamp"})) {
                         $metrics += [PSCustomObject]@{
                             Name = "vmax_$($resource.resource)_$metric"
-                            Value = $m."$metric"
-                            Label = $resource.resource + "Id=" + $id
+                            Value = [string]$m."$metric"
+                            Label = $resource.resource + "Id=" + '"' + $id + '"'
                         }
                     }
                 }
@@ -83,8 +93,8 @@ function Get-Metrics {
                 foreach ($metric in ($m.PSObject.Properties | Select -Expand Name | Where-Object {$_ -ne "timestamp"})) {
                     $metrics += [PSCustomObject]@{
                         Name = "vmax_$($resource.resource)_$metric"
-                        Value = $m."$metric"
-                        Label = $resource.resource + "Id=" + $config.symmetrixId
+                        Value = [string]$m."$metric"
+                        Label = $resource.resource + "Id=" + '"' + $config.symmetrixId + '"'
                     }
                 }
             }
